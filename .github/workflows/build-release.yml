@@ -1,0 +1,43 @@
+name: Build and release exe
+
+# Publishes a fresh RekordboxNowPlaying.exe under the "latest" release on
+# every push to main, so RequestApp's dashboard-download function can always
+# fetch a current build without anyone manually rebuilding/re-uploading it.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build exe
+        run: |
+          pyinstaller --noconfirm --clean --onefile --windowed `
+            --name "RekordboxNowPlaying" `
+            --icon "app_icon.ico" `
+            main.py
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest build
+          body: Automatically built from the latest commit on main.
+          files: dist/RekordboxNowPlaying.exe
+          make_latest: true

@@ -73,6 +73,10 @@ class Worker:
         log.info("Worker stopped")
 
     def _tick(self):
+        if not config.CONFIGURED:
+            self._set_status("unconfigured", "Not set up — redownload from your dashboard")
+            return
+
         if not self._enabled:
             self._set_status("waiting", "Broadcasting paused")
             return

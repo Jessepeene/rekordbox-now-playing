@@ -7,6 +7,7 @@ _COLORS = {
     "idle": (149, 165, 166),  # gray - rekordbox open, nothing playing
     "waiting": (241, 196, 15),  # amber - broadcasting paused by user
     "error": (231, 76, 60),  # red - rekordbox not running
+    "unconfigured": (142, 68, 173),  # purple - no config.json / token found
 }
 
 
