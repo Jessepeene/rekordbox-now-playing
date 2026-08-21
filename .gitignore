@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# PyInstaller build output
+build/
+dist/
+*.spec
+
+# uiautomation debug log
+@AutomationLog.txt
+
+# Diagnostic dump of the user's real Rekordbox library (personal data)
+dev_tools/tree_dump.txt
