@@ -2,7 +2,7 @@ import ctypes
 import logging
 import sys
 
-from app import config, singleinstance, splash, tray
+from app import config, singleinstance, tray
 from app.logging_setup import configure_logging
 
 log = logging.getLogger(__name__)
@@ -26,10 +26,6 @@ def main():
         return
 
     log.info("%s starting", config.APP_NAME)
-    try:
-        splash.show()
-    except Exception:
-        log.exception("Failed to show startup splash")
 
     try:
         tray.run()

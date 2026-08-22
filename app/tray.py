@@ -63,6 +63,16 @@ def run():
 
     def setup(icon):
         icon.visible = True
+        # A brief confirmation that it's running, without a separate GUI
+        # toolkit: an animated Tkinter splash used to serve this role, but a
+        # native Tcl/Tk crash during its fade animation can't be caught by a
+        # Python try/except and silently kills the whole process before the
+        # tray icon ever appears -- exactly this notify() call replaces it,
+        # using the tray icon's own (already-proven-working) backend instead.
+        try:
+            icon.notify(f"{config.APP_NAME} is running in your system tray.", config.APP_NAME)
+        except Exception:
+            log.exception("Failed to show startup notification")
         threading.Thread(target=worker.run, daemon=True).start()
 
     icon.run(setup=setup)

@@ -4,9 +4,9 @@ A Windows system-tray app that watches a running Rekordbox instance and reports 
 
 ## For end users
 
-Download the companion app from your dashboard's "Download companion app" button, unzip it, and run `RekordboxNowPlaying.exe` from inside the extracted folder - no command line, no setup. On launch you'll get a brief popup confirming it's running, then it sits in the system tray. Right-click the tray icon for status, a "Broadcasting enabled" toggle, "Start with Windows", and "View log".
+Download the exe and your `config.json` from your dashboard's "Your guest page" section (two separate downloads), put them in the same folder, and run `RekordboxNowPlaying.exe` - no command line, no setup. On launch it sits in the system tray and shows a brief tray notification confirming it's running. Right-click the tray icon for status, a "Broadcasting enabled" toggle, "Start with Windows", and "View log".
 
-The download is a zip containing this exe plus a `config.json` with your own API token already filled in - the exe reads that file from its own folder at startup, so it's already pointed at your event with no typing required. If the tray icon shows purple ("Not set up"), `config.json` is missing or wasn't extracted alongside the exe - redownload it from the dashboard.
+The exe reads `config.json` from its own folder at startup, so it's already pointed at your event with no typing required, as long as both files are in the same folder. If the tray icon shows purple ("Not set up"), `config.json` is missing from that folder - redownload it from the dashboard.
 
 ## How it works
 
@@ -17,7 +17,7 @@ The download is a zip containing this exe plus a `config.json` with your own API
 
 ## Project layout
 
-- `app/` - the application (scraper, state machine, API client, tray UI, splash screen)
+- `app/` - the application (scraper, state machine, API client, tray UI)
 - `main.py` - entry point
 - `dev_tools/` - one-off diagnostic scripts used to map Rekordbox's UI Automation tree (not needed to run the app)
 - `build.ps1` - builds a standalone `dist/RekordboxNowPlaying.exe` via PyInstaller
