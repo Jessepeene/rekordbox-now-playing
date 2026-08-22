@@ -4,9 +4,11 @@ A Windows system-tray app that watches a running Rekordbox instance and reports 
 
 ## For end users
 
-Download the exe and your `config.json` from your dashboard's "Your guest page" section (two separate downloads), put them in the same folder, and run `RekordboxNowPlaying.exe` - no command line, no setup. On launch it sits in the system tray and shows a brief tray notification confirming it's running. Right-click the tray icon for status, a "Broadcasting enabled" toggle, "Start with Windows", and "View log".
+Download the app (a zip) and your `config.json` from your dashboard's "Your guest page" section (two separate downloads), unzip the app, put `config.json` inside that same unzipped folder next to `RekordboxNowPlaying.exe`, and run the exe - no command line, no setup. On launch it sits in the system tray and shows a brief tray notification confirming it's running. Right-click the tray icon for status, a "Broadcasting enabled" toggle, "Start with Windows", and "View log".
 
 The exe reads `config.json` from its own folder at startup, so it's already pointed at your event with no typing required, as long as both files are in the same folder. If the tray icon shows purple ("Not set up"), `config.json` is missing from that folder - redownload it from the dashboard.
+
+Windows or your antivirus may flag the download as suspicious the first time - that's a false positive common to small, unsigned, freshly-built executables (especially ones using UI Automation, which legitimate tools and spyware both use to read text from other windows). Click "More info" -> "Run anyway" if you see a SmartScreen prompt.
 
 ## How it works
 
@@ -20,7 +22,7 @@ The exe reads `config.json` from its own folder at startup, so it's already poin
 - `app/` - the application (scraper, state machine, API client, tray UI)
 - `main.py` - entry point
 - `dev_tools/` - one-off diagnostic scripts used to map Rekordbox's UI Automation tree (not needed to run the app)
-- `build.ps1` - builds a standalone `dist/RekordboxNowPlaying.exe` via PyInstaller
+- `build.ps1` - builds `dist/RekordboxNowPlaying/` via PyInstaller and zips it to `dist/RekordboxNowPlaying.zip`
 
 ## Building from source
 
@@ -30,12 +32,12 @@ venv\Scripts\pip install -r requirements.txt
 .\build.ps1
 ```
 
-Produces `dist\RekordboxNowPlaying.exe`, a standalone executable (no Python install required to run it).
+Produces `dist\RekordboxNowPlaying.zip` (containing `RekordboxNowPlaying.exe` plus its supporting files - no Python install required to run it). Built with PyInstaller's default `--onedir` mode rather than `--onefile`: onefile's runtime self-extraction into a temp directory is exactly the behavior pattern antivirus heuristics associate with malware droppers, so unpacking everything at build time instead (into a zip) measurably reduces false-positive detections for an unsigned exe like this one.
 
 ## Configuration
 
-Timing constants live in `app/config.py`. The API endpoint and auth token are no longer hardcoded there - they're read from a `config.json` file placed next to the exe at runtime (`{"apiUrl": "...", "token": "..."}`), which is how RequestApp's dashboard delivers a per-DJ token with zero manual setup: its "Download companion app" button zips this exe together with a freshly generated `config.json`. Without a `config.json` present, `config.py` falls back to a blank token (the tray shows "Not set up") - useful for local development, not for a real deploy.
+Timing constants live in `app/config.py`. The API endpoint and auth token are no longer hardcoded there - they're read from a `config.json` file placed next to the exe at runtime (`{"apiUrl": "...", "token": "..."}`), which is how RequestApp's dashboard delivers a per-DJ token with zero manual setup: it links directly to this repo's released zip, and a separate small dashboard endpoint hands back a freshly generated `config.json` to place alongside it. Without a `config.json` present, `config.py` falls back to a blank token (the tray shows "Not set up") - useful for local development, not for a real deploy.
 
 ## CI
 
-`.github/workflows/build-release.yml` builds a fresh exe on `windows-latest` and publishes it as the `latest` GitHub Release on every push to `main`. RequestApp's dashboard always downloads that release's asset, so this exe never needs manual rebuilding or re-uploading - only pushing a change here.
+`.github/workflows/build-release.yml` builds a fresh zip on `windows-latest` and publishes it as the `latest` GitHub Release on every push to `main`. RequestApp's dashboard always links to that release's asset, so this never needs manual rebuilding or re-uploading - only pushing a change here.

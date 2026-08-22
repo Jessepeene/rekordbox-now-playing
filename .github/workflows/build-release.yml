@@ -1,7 +1,7 @@
 name: Build and release exe
 
-# Publishes a fresh RekordboxNowPlaying.exe under the "latest" release on
-# every push to main, so RequestApp's dashboard-download function can always
+# Publishes a fresh RekordboxNowPlaying.zip under the "latest" release on
+# every push to main, so RequestApp's dashboard download link can always
 # fetch a current build without anyone manually rebuilding/re-uploading it.
 on:
   push:
@@ -26,12 +26,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Build exe
+      - name: Build app
         run: |
-          pyinstaller --noconfirm --clean --onefile --windowed `
+          # --onedir (the default, so no --onefile flag): onefile's runtime
+          # self-extraction into a temp directory is exactly the behavior
+          # pattern antivirus heuristics associate with malware droppers.
+          # Unpacking everything at build time instead measurably reduces
+          # false-positive detections for an unsigned exe like this one.
+          pyinstaller --noconfirm --clean --windowed `
             --name "RekordboxNowPlaying" `
             --icon "app_icon.ico" `
             main.py
+          Compress-Archive -Path "dist/RekordboxNowPlaying/*" -DestinationPath "dist/RekordboxNowPlaying.zip"
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
@@ -39,5 +45,5 @@ jobs:
           tag_name: latest
           name: Latest build
           body: Automatically built from the latest commit on main.
-          files: dist/RekordboxNowPlaying.exe
+          files: dist/RekordboxNowPlaying.zip
           make_latest: true
