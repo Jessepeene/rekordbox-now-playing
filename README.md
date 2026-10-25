@@ -2,8 +2,7 @@
 
 A Windows tray app that reads the track currently playing in Rekordbox straight from its on-screen deck displays and reports it to an HTTP API, so a website (for example a song-request page) can show "now playing" live.
 
-![Tray menu](docs/tray-menu.png)
-<!-- Screenshot placeholder: add docs/tray-menu.png showing the right-click tray menu. -->
+![Tray menu showing the current status, the broadcasting and start-with-Windows toggles, View log and Exit](docs/traypopup.jpg)
 
 Rekordbox has no public API for the current track, so this app reads it off the screen the way a screen reader would, works out which deck is actually live, and only sends updates when something changes.
 
