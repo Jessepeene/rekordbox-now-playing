@@ -10,6 +10,8 @@ from .worker import Worker
 
 log = logging.getLogger(__name__)
 
+_MAX_TOOLTIP_CHARS = 127
+
 
 def _open_log(icon, item):
     try:
@@ -58,7 +60,12 @@ def run():
 
     def on_status_change(status, text):
         icon.icon = icons.get(status)
-        icon.title = f"{config.APP_NAME}\n{text}"
+        # Windows caps tray tooltips at 127 characters and pystray raises on
+        # longer ones, which long track names or config paths can exceed.
+        title = f"{config.APP_NAME}\n{text}"
+        if len(title) > _MAX_TOOLTIP_CHARS:
+            title = title[: _MAX_TOOLTIP_CHARS - 3] + "..."
+        icon.title = title
 
     worker.set_status_change_callback(on_status_change)
 
