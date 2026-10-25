@@ -36,13 +36,14 @@ def _toggle_broadcasting(worker):
 
 
 def run():
-    worker = Worker()
+    worker = Worker(config.load_api_settings())
 
     status_item = MenuItem(lambda item: worker.status_text, None, enabled=False)
     broadcasting_item = MenuItem(
         "Broadcasting enabled",
         _toggle_broadcasting(worker),
         checked=lambda item: worker.broadcasting_enabled,
+        enabled=lambda item: worker.is_configured,
     )
     autostart_item = MenuItem(
         "Start with Windows",

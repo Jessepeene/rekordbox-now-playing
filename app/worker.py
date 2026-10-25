@@ -4,7 +4,8 @@ import time
 
 import comtypes
 
-from . import api_client, config
+from . import config
+from .api_client import ApiClient
 from .scraper import RekordboxScraper, RekordboxNotRunning
 from .state import PlaybackState
 
@@ -14,20 +15,21 @@ log = logging.getLogger(__name__)
 class Worker:
     """Runs the scrape -> decide -> broadcast loop on a background thread.
 
-    `status` is one of: "error" (Rekordbox not running), "waiting"
-    (broadcasting paused by the user), "idle" (Rekordbox open, nothing
-    playing), "playing". `status_text` is a human-readable description for
-    the tray menu.
+    `status` is one of: "unconfigured" (no API URL/token found), "error"
+    (Rekordbox not running), "waiting" (broadcasting paused by the user),
+    "idle" (Rekordbox open, nothing playing), "playing". `status_text` is a
+    human-readable description for the tray menu.
     """
 
-    def __init__(self):
+    def __init__(self, api_settings):
         self._scraper = RekordboxScraper()
         self._state = PlaybackState()
         self._stop_event = threading.Event()
-        self._enabled = True
+        self._api = ApiClient(api_settings) if api_settings else None
+        self._enabled = self._api is not None
 
         self.status = "error"
-        self.status_text = "Looking for Rekordbox..."
+        self.status_text = "Looking for Rekordbox..." if self.is_configured else self._not_configured_text()
         self._on_status_change = None
 
     def set_status_change_callback(self, callback):
@@ -47,8 +49,16 @@ class Worker:
     def broadcasting_enabled(self):
         return self._enabled
 
+    @property
+    def is_configured(self):
+        return self._api is not None
+
     def set_broadcasting_enabled(self, value):
-        self._enabled = value
+        self._enabled = value and self.is_configured
+
+    @staticmethod
+    def _not_configured_text():
+        return f"Not set up - add config.json at {config.config_file_paths()[0]}"
 
     def stop(self):
         self._stop_event.set()
@@ -73,8 +83,8 @@ class Worker:
         log.info("Worker stopped")
 
     def _tick(self):
-        if not config.CONFIGURED:
-            self._set_status("unconfigured", "Not set up — redownload from your dashboard")
+        if not self.is_configured:
+            self._set_status("unconfigured", self._not_configured_text())
             return
 
         if not self._enabled:
@@ -91,11 +101,11 @@ class Worker:
 
         if decision.should_send:
             if decision.is_playing:
-                ok = api_client.send_now_playing(decision.title, decision.artist)
+                ok = self._api.send_now_playing(decision.title, decision.artist)
                 if not ok:
                     log.warning("Failed to report now playing (will retry on next change/heartbeat)")
             else:
-                api_client.send_stopped()
+                self._api.send_stopped()
 
         if decision.is_playing:
             title, artist = self._state.current_display()

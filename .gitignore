@@ -15,3 +15,7 @@ dist/
 
 # Diagnostic dump of the user's real Rekordbox library (personal data)
 dev_tools/tree_dump.txt
+
+# Local secrets (API URL / token) - see config.example.json
+config.json
+.env
