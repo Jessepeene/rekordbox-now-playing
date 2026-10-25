@@ -19,3 +19,6 @@ dev_tools/tree_dump.txt
 # Local secrets (API URL / token) - see config.example.json
 config.json
 .env
+
+# pytest
+.pytest_cache/
